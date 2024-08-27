@@ -1,0 +1,656 @@
+##Neuron quantification code with BRANCHES BRANCHES
+
+{
+  
+  tere<-choose.dir()
+  
+  
+  library(stringr)
+  library(qpcR)
+  library("gplots")
+  library(dplyr)
+  library(matrixStats)
+  library(zoo)
+  library(TTR)
+  library(viridis)
+  library(ggplot2)
+  library(markovchain)
+  library(RColorBrewer)
+  library(ggpubr)
+  library(plotly)
+  library(svDialogs)
+  library(tidyr)
+  setwd(gsub("\\\\","/",tere))
+  
+  dname<-list.files(gsub("\\\\","/",tere),pattern ="whole_skeleton.csv")
+  
+  dname
+  comb_me<-list()
+  for(jj in 1:length(dname)){
+    dat<-data.frame(read.csv(dname[jj]))
+    
+    dat_sum<-data.frame(colSums(dat))
+    colnames(dat_sum)<-gsub("whole_skeleton.csv","",dname[jj])
+    comb_me[[jj]]<-dat_sum
+  }
+  dcomb<-data.frame(t(dplyr::bind_cols(comb_me)))
+  write.csv(dcomb,"1_combined_whole_skeleton.csv")
+  
+  
+  
+  dname<-list.files(gsub("\\\\","/",tere),pattern ="Inside_skeleton.csv")
+  
+  dname
+  comb_me<-list()
+  for(jj in 1:length(dname)){
+    dat<-data.frame(read.csv(dname[jj]))
+    
+    dat_sum<-data.frame(colSums(dat))
+    colnames(dat_sum)<-gsub("Inside_skeleton.csv","",dname[jj])
+    comb_me[[jj]]<-dat_sum
+  }
+  dcomb<-data.frame(t(dplyr::bind_cols(comb_me)))
+  write.csv(dcomb,"1_combined_Inside_skeleton.csv")
+  
+  
+  
+  dname<-list.files(gsub("\\\\","/",tere),pattern ="Outside_skeleton.csv")
+  
+  dname
+  comb_me<-list()
+  for(jj in 1:length(dname)){
+    dat<-data.frame(read.csv(dname[jj]))
+    
+    dat_sum<-data.frame(colSums(dat))
+    colnames(dat_sum)<-gsub("Outside_skeleton.csv","",dname[jj])
+    comb_me[[jj]]<-dat_sum
+  }
+  dcomb<-data.frame(t(dplyr::bind_cols(comb_me)))
+  write.csv(dcomb,"1_combined_Outside_skeleton.csv")
+  
+  
+  
+  
+  
+  dname
+  unique(gsub("_.*","",dname))
+  
+  
+  dname<-list.files(gsub("\\\\","/",tere),pattern ="sholl.csv")
+  
+  dname
+  comb_me<-list()
+  
+  unlismn<-data.frame(matrix(nrow=1000,ncol=1000))
+  for(jj in 1:length(dname)){
+    dat<-data.frame(read.csv(dname[jj]))
+    
+    dat_sum<-data.frame(dat$Inters.)
+    dos<-data.frame(replicate(2000-nrow(dat_sum),"NA"))
+    colnames(dos)<-c("dat.Inters.")
+    dpe<-  rbind(dat_sum,dos)
+    colnames(dpe)<-gsub("_sholl.csv","",dname[jj])
+    
+    comb_me[[jj]]<-dpe
+    #unlismn[jj,]<-c(as.numeric(dat_sum$dat.Inters.))
+  }
+  dcomb<-data.frame((dplyr::bind_cols(comb_me)))
+  write.csv(dcomb,"1_combined_sholl.csv")
+  
+  
+  
+  
+  
+  dname_oc<-list.files(gsub("\\\\","/",tere),pattern ="dendrite_coverage_occupation.csv")
+  
+  dname_oc
+  
+  comb_me_oc_epv<-list()
+  comb_me_oc_tdl<-list()
+  comb_me_oc_epv_density<-list()
+  
+  comb_me_oc_branches<-list()
+  comb_me_oc_branch_density<-list()
+  
+  
+  unlismn<-data.frame(matrix(nrow=10000,ncol=10000))
+  for(jj in 1:length(dname_oc)){
+    dattt<-data.frame(read.csv(dname_oc[jj]))
+    dat<- dattt[complete.cases(dattt), ]
+    dat_sum<-data.frame(dat$Total.dendritic.length)
+    colnames(dat_sum)<-c("Total.dendritic.length")
+    dos<-data.frame(replicate(10000-nrow(dat_sum),"NA"))
+    colnames(dos)<-c("Total.dendritic.length")
+    dpe<-  rbind(dat_sum,dos)
+    colnames(dpe)<-gsub("_dendrite_coverage_occupation.csv","",dname_oc[jj])
+    
+    comb_me_oc_tdl[[jj]]<-dpe
+    
+    
+    dat_sum<-data.frame(dat$End.point.voxels)
+    colnames(dat_sum)<-c("End.point.voxels")
+    dos<-data.frame(replicate(10000-nrow(dat_sum),"NA"))
+    colnames(dos)<-c("End.point.voxels")
+    dpe<-  rbind(dat_sum,dos)
+    colnames(dpe)<-gsub("_dendrite_coverage_occupation.csv","",dname_oc[jj])
+    
+    comb_me_oc_epv[[jj]]<-dpe
+    
+    dat_sum<-data.frame(dat$EPV.divided.by.TDL)
+    colnames(dat_sum)<-c("EPV.divided.by.TDL")
+    dos<-data.frame(replicate(10000-nrow(dat_sum),"NA"))
+    colnames(dos)<-c("EPV.divided.by.TDL")
+    dpe<-  rbind(dat_sum,dos)
+    colnames(dpe)<-gsub("_dendrite_coverage_occupation.csv","",dname_oc[jj])
+    
+    comb_me_oc_epv_density[[jj]]<-dpe
+    
+    
+    
+    dat_sum<-data.frame(dat$Branches)
+    colnames(dat_sum)<-c("Branches")
+    dos<-data.frame(replicate(10000-nrow(dat_sum),"NA"))
+    colnames(dos)<-c("Branches")
+    dpe<-  rbind(dat_sum,dos)
+    colnames(dpe)<-gsub("_dendrite_coverage_occupation.csv","",dname_oc[jj])
+    
+    comb_me_oc_branches[[jj]]<-dpe
+    
+    
+    
+    
+    dat_sum<-data.frame(dat$Branches.divided.by.TDL)
+    colnames(dat_sum)<-c("Branches.divided.by.TDL")
+    dos<-data.frame(replicate(10000-nrow(dat_sum),"NA"))
+    colnames(dos)<-c("Branches.divided.by.TDL")
+    dpe<-  rbind(dat_sum,dos)
+    colnames(dpe)<-gsub("_dendrite_coverage_occupation.csv","",dname_oc[jj])
+    
+    comb_me_oc_branch_density[[jj]]<-dpe
+    
+    
+    
+    
+    
+    
+    
+    #unlismn[jj,]<-c(as.numeric(dat_sum$dat.Inters.))
+  }
+  dcomb_oc_tdl<-data.frame((dplyr::bind_cols(comb_me_oc_tdl)))
+  
+  write.csv(dcomb_oc_tdl,"1_TDL_dendrite_coverage_occupation.csv")
+  
+  dcomb_oc_epv<-data.frame((dplyr::bind_cols(comb_me_oc_epv)))
+  
+  write.csv(dcomb_oc_epv,"1_EPV_dendrite_coverage_occupation.csv")
+  
+  dcomb_oc_density<-data.frame((dplyr::bind_cols(comb_me_oc_epv_density)))
+  
+  write.csv(dcomb_oc_density,"1_EPV_Density_dendrite_coverage_occupation.csv")
+  
+  
+  
+  
+  dcomb_oc_branches<-data.frame((dplyr::bind_cols(comb_me_oc_branches)))
+  
+  write.csv(dcomb_oc_branches,"1_Branches_dendrite_coverage_occupation.csv")
+  
+  dcomb_oc_branch_density<-data.frame((dplyr::bind_cols(comb_me_oc_branch_density)))
+  
+  write.csv(dcomb_oc_branch_density,"1_Branch_Density_dendrite_coverage_occupation.csv")
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  temp_matx<-as.matrix(read.csv("1_TDL_dendrite_coverage_occupation.csv"))  
+  temp_matx[temp_matx == 0] <- NA
+  temp_matx[temp_matx == "Inf"] <- NA
+  
+  TDL_dendrite_coverage_occupation_mn<-data.frame(colMeans(temp_matx,na.rm=TRUE))
+  colnames(TDL_dendrite_coverage_occupation_mn)<-c("TDL_occupation")
+  temp_nam<-rownames(TDL_dendrite_coverage_occupation_mn)
+  Genotypes<-gsub("_.*","",temp_nam)
+  TDL_dendrite_coverage_occupation_mnplt<-cbind(Genotypes,temp_nam, TDL_dendrite_coverage_occupation_mn)
+  TDL_dendrite_coverage_occupation_mnplted<- TDL_dendrite_coverage_occupation_mnplt[-c(1),]
+  
+  
+  
+  
+  temp_matx<-as.matrix(read.csv("1_EPV_dendrite_coverage_occupation.csv"))  
+  temp_matx[temp_matx == 0] <- NA
+  temp_matx[temp_matx == "Inf"] <- NA
+  EPV_dendrite_coverage_occupation_mn<-colMeans(temp_matx,na.rm=TRUE)
+  
+  EPV_dendrite_coverage_occupation_mn<-data.frame(colMeans(temp_matx,na.rm=TRUE))
+  colnames(EPV_dendrite_coverage_occupation_mn)<-c("EPV_occupation")
+  temp_nam<-rownames(EPV_dendrite_coverage_occupation_mn)
+  Genotypes<-gsub("_.*","",temp_nam)
+  EPV_dendrite_coverage_occupation_mnplt<-cbind(Genotypes,temp_nam, EPV_dendrite_coverage_occupation_mn)
+  EPV_dendrite_coverage_occupation_mnplted<- EPV_dendrite_coverage_occupation_mnplt[-c(1),]
+  
+  
+  temp_matx<-as.matrix(read.csv("1_EPV_Density_dendrite_coverage_occupation.csv"))  
+  temp_matx[temp_matx == 0] <- NA
+  temp_matx[temp_matx == "Inf"] <- NA
+  epv_Density_dendrite_coverage_occupation_mn<-colMeans(temp_matx,na.rm=TRUE)
+  
+  epv_Density_dendrite_coverage_occupation_mn<-data.frame(colMeans(temp_matx,na.rm=TRUE))
+  colnames(epv_Density_dendrite_coverage_occupation_mn)<-c("EPV_Density_occupation")
+  temp_nam<-rownames(epv_Density_dendrite_coverage_occupation_mn)
+  Genotypes<-gsub("_.*","",temp_nam)
+  epv_Density_dendrite_coverage_occupation_mnplt<-cbind(Genotypes,temp_nam, epv_Density_dendrite_coverage_occupation_mn)
+  epv_Density_dendrite_coverage_occupation_mnplted<- epv_Density_dendrite_coverage_occupation_mnplt[-c(1),]
+  
+  
+  temp_matx<-as.matrix(read.csv("1_Branch_Density_dendrite_coverage_occupation.csv"))  
+  temp_matx[temp_matx == 0] <- NA
+  temp_matx[temp_matx == "Inf"] <- NA
+  Branch_Density_dendrite_coverage_occupation_mn<-colMeans(temp_matx,na.rm=TRUE)
+  epv_Density_dendrite_coverage_occupation_mnplted
+  Branch_Density_dendrite_coverage_occupation_mn<-data.frame(colMeans(temp_matx,na.rm=TRUE))
+  colnames(Branch_Density_dendrite_coverage_occupation_mn)<-c("Branch_Density_occupation")
+  temp_nam<-rownames(Branch_Density_dendrite_coverage_occupation_mn)
+  Genotypes<-gsub("_.*","",temp_nam)
+  Branch_Density_dendrite_coverage_occupation_mnplt<-cbind(Genotypes,temp_nam, Branch_Density_dendrite_coverage_occupation_mn)
+  Branch_Density_dendrite_coverage_occupation_mnplted<- Branch_Density_dendrite_coverage_occupation_mnplt[-c(1),]
+  
+  Branch_Density_dendrite_coverage_occupation_mnplted$Branch_Density_occupation
+  
+  
+  
+  temp_matx<-as.matrix(read.csv("1_Branches_dendrite_coverage_occupation.csv"))  
+  temp_matx[temp_matx == 0] <- NA
+  temp_matx[temp_matx == "Inf"] <- NA
+  Branch_dendrite_coverage_occupation_mn<-colMeans(temp_matx,na.rm=TRUE)
+  
+  Branch_dendrite_coverage_occupation_mn<-data.frame(colMeans(temp_matx,na.rm=TRUE))
+  colnames(Branch_dendrite_coverage_occupation_mn)<-c("Branch_occupation")
+  temp_nam<-rownames(Branch_dendrite_coverage_occupation_mn)
+  Genotypes<-gsub("_.*","",temp_nam)
+  Branch_dendrite_coverage_occupation_mnplt<-cbind(Genotypes,temp_nam, Branch_dendrite_coverage_occupation_mn)
+  Branch_dendrite_coverage_occupation_mnplted<- Branch_dendrite_coverage_occupation_mnplt[-c(1),]
+  
+  
+  
+  
+  
+  
+  TDL_dendrite_coverage_occupation_graph<-ggplot(TDL_dendrite_coverage_occupation_mnplted, aes(x=Genotypes, y=TDL_occupation))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(TDL_dendrite_coverage_occupation_mnplted$TDL_occupation))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("TDL_dendrite_coverage_occupation")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(TDL_dendrite_coverage_occupation_mnplted$TDL_occupation), label.x=.5 )
+  TDL_dendrite_coverage_occupation_graph
+  
+  EPV_dendrite_coverage_occupation_graph<-ggplot(EPV_dendrite_coverage_occupation_mnplted,  aes(x=Genotypes, y=EPV_occupation))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(EPV_dendrite_coverage_occupation_mnplted$EPV_occupation))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("EPV_dendrite_coverage_occupation")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(EPV_dendrite_coverage_occupation_mnplted$EPV_occupation), label.x=.5 )
+  EPV_dendrite_coverage_occupation_graph
+  
+  EPV_Density_dendrite_coverage_occupation_graph<-ggplot(epv_Density_dendrite_coverage_occupation_mnplted, aes(x=Genotypes, y=EPV_Density_occupation))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(epv_Density_dendrite_coverage_occupation_mnplted$EPV_Density_occupation))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("EPV_Density_dendrite_coverage_occupation")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(epv_Density_dendrite_coverage_occupation_mnplted$EPV_Density_occupation), label.x=.5 )
+  EPV_Density_dendrite_coverage_occupation_graph
+  
+  
+  Branch_Density_dendrite_coverage_occupation_graph<-ggplot(Branch_Density_dendrite_coverage_occupation_mnplted, aes(x=Genotypes, y=Branch_Density_occupation))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(Branch_Density_dendrite_coverage_occupation_mnplted$Branch_Density_occupation))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Branch_Density_dendrite_coverage_occupation")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(Branch_Density_dendrite_coverage_occupation_mnplted$Branch_Density_occupation), label.x=.5 )
+  Branch_Density_dendrite_coverage_occupation_graph
+  
+  
+ Branch_dendrite_coverage_occupation_graph<-ggplot(Branch_dendrite_coverage_occupation_mnplted,  aes(x=Genotypes, y=Branch_occupation))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(Branch_dendrite_coverage_occupation_mnplted$Branch_occupation))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Branch_occupation_dendrite_coverage_occupation")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(Branch_dendrite_coverage_occupation_mnplted$Branch_occupation), label.x=.5 )
+ Branch_dendrite_coverage_occupation_graph
+  
+  sholl_dat<-read.csv("sholl results.csv")
+  skel_dat<-read.csv("1_combined_whole_skeleton.csv")
+  
+ epv_Density<-skel_dat$X..End.point.voxels/skel_dat$X..Slab.voxels
+ Branche_Density<-skel_dat$X..Branches/skel_dat$X..Slab.voxels
+ 
+   all_dat<-data.frame(cbind(gsub("_.*","",skel_dat$X.1),skel_dat,epv_Density,Branche_Density,sholl_dat$Image,sholl_dat$Max.inters.,sholl_dat$Max.inters..radius))
+  da<-colnames(all_dat)
+  das<-gsub("X..","",da)
+  dass<-gsub("[.]","_",das)
+  colnames(all_dat)<-c("Genotype","file_name",dass[3:length(dass)])
+  
+  rownames(all_dat)<-all_dat[,2]
+  
+  
+  area_cov<-read.csv("Area_coverage.csv")
+  da_area_cov<-area_cov$Neuron
+  Genotypes<-gsub("_.*","",da_area_cov)
+  area_covs<-cbind(Genotypes,area_cov)
+  
+  
+  
+  
+  convex_hull_area<-read.csv("Convex_hull_Area.csv")
+  
+  da_area_convex_gen<-convex_hull_area$Label
+  Genotypes<-gsub("_.*","",da_area_convex_gen)
+  convex_hull_areaG<-cbind(Genotypes,convex_hull_area)
+  
+  
+  inside_skeleton_dat<-read.csv("1_combined_Inside_skeleton.csv")
+  inside_skeleton_dat_temp<-inside_skeleton_dat$X.1
+  Genotype<-gsub("_.*","",inside_skeleton_dat_temp)
+  inside_skeleton_datplt<-cbind(Genotypes,inside_skeleton_dat)
+  
+  outside_skeleton_dat<-read.csv("1_combined_Outside_skeleton.csv")
+  outside_skeleton_dat_temp<-outside_skeleton_dat$X.1
+  Genotype<-gsub("_.*","",outside_skeleton_dat_temp)
+  outside_skeleton_datplt<-cbind(Genotypes,outside_skeleton_dat)
+  
+  
+  
+  
+  
+  da_area_convex_graph<-ggplot(convex_hull_areaG, aes(x=Genotypes, y=Area))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(convex_hull_areaG$Area))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Convex Hull Area")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(convex_hull_areaG$Area), label.x=.5 )
+  da_area_convex_graph
+  
+  
+  
+  
+  
+  area_covered<-ggplot(area_covs, aes(x=Genotypes, y=Area_coverage))+ geom_violin(aes(color=Genotypes))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(area_covs$Area_coverage))+
+    coord_flip()+geom_jitter( aes( fill=Genotypes),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("% Area covered")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(area_covs$Area_coverage), label.x=.5 )
+  area_covered
+  
+  Branches<-ggplot(all_dat, aes(x=Genotype, y=Branches))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$Branches))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Total Branches")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$Branches), label.x=.5 )
+  Branches
+  
+  end_points<-ggplot(all_dat, aes(x=Genotype, y=End_point_voxels))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$End_point_voxels))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Total End Point Voxels")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$End_point_voxels), label.x=.5 )
+  
+  end_points
+  
+  
+ 
+  
+  branch_lent<-ggplot(all_dat, aes(x=Genotype, y=Slab_voxels))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$Slab_voxels))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Total Slab Voxels")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$Slab_voxels), label.x=.5 )
+  branch_lent
+  branch_den<-ggplot(all_dat, aes(x=Genotype, y=Branche_Density))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$Branche_Density))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Total Branch Density")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$Branche_Density), label.x=.5 )
+  branch_den
+ epv_density<-ggplot(all_dat, aes(x=Genotype, y=epv_Density))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$epv_Density))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Total EPV Density")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$epv_Density), label.x=.5 )
+ epv_density
+  
+  
+  max_int<-ggplot(all_dat, aes(x=Genotype, y=sholl_dat_Max_inters_))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$sholl_dat_Max_inters_))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("sholl_dat_Max_inters_")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$sholl_dat_Max_inters_), label.x=.5 )
+  max_int
+  
+  max_int_radi<-ggplot(all_dat, aes(x=Genotype, y=sholl_dat_Max_inters__radius))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(all_dat$sholl_dat_Max_inters__radius))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("sholl_dat_Max_inters__radius")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(all_dat$sholl_dat_Max_inters__radius)+15, label.x=.5 )
+  max_int_radi
+  
+  inside_end_points<-ggplot(inside_skeleton_datplt, aes(x=Genotype, y=X..End.point.voxels))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(inside_skeleton_datplt$X..End.point.voxels))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Inside End Point Voxels")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(inside_skeleton_datplt$X..End.point.voxels), label.x=.5 )
+  inside_end_points
+  
+  inside_branches<-ggplot(inside_skeleton_datplt, aes(x=Genotype, y=X..Branches))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(inside_skeleton_datplt$X..Branches))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Inside Branches")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(inside_skeleton_datplt$X..Branches), label.x=.5 )
+  inside_branches
+  
+  inside_branch_lent<-ggplot(inside_skeleton_datplt, aes(x=Genotype, y=X..Slab.voxels))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(inside_skeleton_datplt$X..Slab.voxels))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Inside Branch Length (slab voxels)")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(inside_skeleton_datplt$X..Slab.voxels), label.x=.5 )
+  
+  inside_branch_den<-ggplot(inside_skeleton_datplt, aes(x=Genotype, y=Average.Branch.Length))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(inside_skeleton_datplt$Average.Branch.Length))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Inside Average Branch Length")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(inside_skeleton_datplt$Average.Branch.Length), label.x=.5 )
+  inside_branch_den
+  
+  outside_branches<-ggplot(outside_skeleton_datplt, aes(x=Genotype, y=X..Branches))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(outside_skeleton_datplt$X..Branches))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Outside Branches")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(outside_skeleton_datplt$X..Branches), label.x=.5 )
+  outside_branches
+  
+  
+  outside_Endpoint_voxels<-ggplot(outside_skeleton_datplt, aes(x=Genotype, y=X..End.point.voxels))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(outside_skeleton_datplt$X..End.point.voxels))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Outside End Point Voxels")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(outside_skeleton_datplt$X..End.point.voxels), label.x=.5 )
+  outside_Endpoint_voxels
+  
+  outside_branch_lent<-ggplot(outside_skeleton_datplt, aes(x=Genotype, y=X..Slab.voxels))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(outside_skeleton_datplt$X..Slab.voxels))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Outside Branch Length (slab voxels)")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(outside_skeleton_datplt$X..Slab.voxels), label.x=.5 )
+  outside_branch_lent
+  
+  outside_branch_den<-ggplot(outside_skeleton_datplt, aes(x=Genotype, y=Average.Branch.Length))+ geom_violin(aes(color=Genotype))+ 
+    stat_summary(fun=mean, geom="point",color="black", size=5)+ ylim(0, max(outside_skeleton_datplt$Average.Branch.Length))+
+    coord_flip()+geom_jitter( aes( fill=Genotype),shape=21,position=position_jitter(0.1))+
+    theme_classic() +xlab("")+ylab("Outside Average Branch Length")+ 
+    theme(legend.position="none")  +stat_compare_means(method = "anova", label.y=min(outside_skeleton_datplt$Average.Branch.Length), label.x=.5 )
+  outside_branch_den
+  
+  
+  
+  
+  
+  
+ 
+  
+  
+  tiff(filename=paste("1_area_covered.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(area_covered)
+  dev.off()
+  tiff(filename=paste("1_branch_den.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(branch_den)
+  dev.off()
+  tiff(filename=paste("1_Branch_dendrite_coverage_occupation_graph.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(Branch_dendrite_coverage_occupation_graph)
+  dev.off()
+  tiff(filename=paste("1_Branch_Density_dendrite_coverage_occupation_graph.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(Branch_Density_dendrite_coverage_occupation_graph)
+  dev.off()
+  tiff(filename=paste("1_branch_lent.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(branch_lent)
+  dev.off()
+  tiff(filename=paste("1_Branches.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(Branches)
+  dev.off()
+  tiff(filename=paste("1_da_area_convex_graph.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(da_area_convex_graph)
+  dev.off()
+  tiff(filename=paste("1_end_points.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(end_points)
+  dev.off()
+  tiff(filename=paste("1_EPV_dendrite_coverage_occupation_graph.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(EPV_dendrite_coverage_occupation_graph)
+  dev.off()
+  tiff(filename=paste("1_epv_density.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(epv_density)
+  dev.off()
+  tiff(filename=paste("1_EPV_Density_dendrite_coverage_occupation_graph.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(EPV_Density_dendrite_coverage_occupation_graph)
+  dev.off()
+  tiff(filename=paste("1_inside_branch_den.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(inside_branch_den)
+  dev.off()
+  tiff(filename=paste("1_inside_branches.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(inside_branches)
+  dev.off()
+  tiff(filename=paste("1_inside_end_points.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(inside_end_points)
+  dev.off()
+  tiff(filename=paste("1_max_int.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(max_int)
+  dev.off()
+  tiff(filename=paste("1_max_int_radi.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(max_int_radi)
+  dev.off()
+  tiff(filename=paste("1_outside_branch_den.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(outside_branch_den)
+  dev.off()
+  tiff(filename=paste("1_outside_branch_lent.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(outside_branch_lent)
+  dev.off()
+  tiff(filename=paste("1_outside_branches.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(outside_branches)
+  dev.off()
+  tiff(filename=paste("1_outside_Endpoint_voxels.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(outside_Endpoint_voxels)
+  dev.off()
+  tiff(filename=paste("1_TDL_dendrite_coverage_occupation_graph.tiff",sep=""),width=700,height=700,units="px",res=130)#Enter the file name	
+  print(TDL_dendrite_coverage_occupation_graph)
+  dev.off()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  total_epv_out<-all_dat[,c('file_name','Genotype','End_point_voxels')]%>%spread(Genotype,End_point_voxels,fill = "", convert = FALSE)
+  
+  total_branches_out<-all_dat[,c('file_name','Genotype','Branches')]%>%spread(Genotype,Branches,fill = "", convert = FALSE)
+  
+  
+  
+  Total_length_out<-all_dat[,c('file_name','Genotype','Slab_voxels')]%>%spread(Genotype,Slab_voxels,fill = "", convert = FALSE)
+  
+  total_branch_density_out<-all_dat[,c('file_name','Genotype','Branche_Density')]%>%spread(Genotype,Branche_Density,fill = "", convert = FALSE)
+  total_epv_density_out<-all_dat[,c('file_name','Genotype','epv_Density')]%>%spread(Genotype,epv_Density,fill = "", convert = FALSE)
+  
+  
+  
+  
+  sholl_max_int_out<-all_dat[,c('file_name','Genotype','sholl_dat_Max_inters_')]%>%spread(Genotype,sholl_dat_Max_inters_,fill = "", convert = FALSE)
+  
+  sholl_max_int_rad_out<-all_dat[,c('file_name','Genotype','sholl_dat_Max_inters__radius')]%>%spread(Genotype,sholl_dat_Max_inters__radius,fill = "", convert = FALSE)
+  
+  area_coverage_out<-area_covs[,c('Genotypes','X','Area_coverage')]%>%spread(Genotypes,Area_coverage,fill = "", convert = FALSE)
+  
+  convex_hull_area_out<-convex_hull_areaG[,c('Genotypes','Label','Area')]%>%spread(Genotypes,Area,fill = "", convert = FALSE)
+  
+  
+  epv_outside_skeleton_out<-outside_skeleton_datplt[,c('Genotypes','X.1','X..End.point.voxels')]%>%spread(Genotypes,X..End.point.voxels,fill = "", convert = FALSE)
+  
+  branches_outside_skeleton_out<-outside_skeleton_datplt[,c('Genotypes','X.1','X..Branches')]%>%spread(Genotypes,X..Branches,fill = "", convert = FALSE)
+  
+  tdl_outside_skeleton_out<-outside_skeleton_datplt[,c('Genotypes','X.1','X..Slab.voxels')]%>%spread(Genotypes,X..Slab.voxels,fill = "", convert = FALSE)
+  
+  avg_branch_length_outside_skeleton_out<-outside_skeleton_datplt[,c('Genotypes','X.1','Average.Branch.Length')]%>%spread(Genotypes,Average.Branch.Length,fill = "", convert = FALSE)
+  
+  
+  epv_inside_skeleton_out<-inside_skeleton_datplt[,c('Genotypes','X.1','X..End.point.voxels')]%>%spread(Genotypes,X..End.point.voxels,fill = "", convert = FALSE)
+  
+  branches_inside_skeleton_out<-inside_skeleton_datplt[,c('Genotypes','X.1','X..Branches')]%>%spread(Genotypes,X..Branches,fill = "", convert = FALSE)
+  
+  tdl_inside_skeleton_out<-inside_skeleton_datplt[,c('Genotypes','X.1','X..Slab.voxels')]%>%spread(Genotypes,X..Slab.voxels,fill = "", convert = FALSE)
+  
+  avg_branch_length_inside_skeleton_out<-inside_skeleton_datplt[,c('Genotypes','X.1','Average.Branch.Length')]%>%spread(Genotypes,Average.Branch.Length,fill = "", convert = FALSE)
+  
+  TDL_dendrite_coverage_occupation_out<-TDL_dendrite_coverage_occupation_mnplted[,c('Genotypes','temp_nam','TDL_occupation')]%>%spread(Genotypes,TDL_occupation,fill = "", convert = FALSE)
+  EPV_dendrite_coverage_occupation_out<-EPV_dendrite_coverage_occupation_mnplted[,c('Genotypes','temp_nam','EPV_occupation')]%>%spread(Genotypes,EPV_occupation,fill = "", convert = FALSE)
+  Density_dendrite_coverage_occupation_out<-epv_Density_dendrite_coverage_occupation_mnplted[,c('Genotypes','temp_nam','EPV_Density_occupation')]%>%spread(Genotypes,EPV_Density_occupation,fill = "", convert = FALSE)
+  Density_dendrite_coverage_occupation_out<-Branch_Density_dendrite_coverage_occupation_mnplted[,c('Genotypes','temp_nam','Branch_Density_occupation')]%>%spread(Genotypes,Branch_Density_occupation,fill = "", convert = FALSE)
+
+  
+  
+  write.csv(area_coverage_out,"1_area_coverage_out.csv")
+  write.csv(avg_branch_length_inside_skeleton_out,"1_avg_branch_length_inside_skeleton_out.csv")
+  write.csv(avg_branch_length_outside_skeleton_out,"1_avg_branch_length_outside_skeleton_out.csv")
+  write.csv(branches_inside_skeleton_out,"1_branches_inside_skeleton_out.csv")
+  write.csv(branches_outside_skeleton_out,"1_branches_outside_skeleton_out.csv")
+  write.csv(convex_hull_area_out,"1_convex_hull_area_out.csv")
+  write.csv(Density_dendrite_coverage_occupation_out,"1_Density_dendrite_coverage_occupation_out.csv")
+  write.csv(Density_dendrite_coverage_occupation_out,"1_Density_dendrite_coverage_occupation_out.csv")
+  write.csv(EPV_dendrite_coverage_occupation_out,"1_EPV_dendrite_coverage_occupation_out.csv")
+  write.csv(epv_inside_skeleton_out,"1_epv_inside_skeleton_out.csv")
+  write.csv(epv_outside_skeleton_out,"1_epv_outside_skeleton_out.csv")
+  write.csv(sholl_max_int_out,"1_sholl_max_int_out.csv")
+  write.csv(sholl_max_int_rad_out,"1_sholl_max_int_rad_out.csv")
+  write.csv(TDL_dendrite_coverage_occupation_out,"1_TDL_dendrite_coverage_occupation_out.csv")
+  write.csv(tdl_inside_skeleton_out,"1_tdl_inside_skeleton_out.csv")
+  write.csv(tdl_outside_skeleton_out,"1_tdl_outside_skeleton_out.csv")
+  write.csv(total_branch_density_out,"1_total_branch_density_out.csv")
+  write.csv(total_branches_out,"1_total_branches_out.csv")
+  write.csv(total_epv_density_out,"1_total_epv_density_out.csv")
+  write.csv(total_epv_out,"1_total_epv_out.csv")
+  write.csv(Total_length_out,"1_Total_length_out.csv")
+  
+  
+  
+  
+
+  
+}
+ 
